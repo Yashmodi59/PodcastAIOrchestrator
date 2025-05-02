@@ -1,0 +1,6 @@
+
+gtts>=2.5.4
+openai>=1.76.2
+streamlit>=1.45.0
+trafilatura>=2.0.0
+wikipedia-api>=0.8.1
