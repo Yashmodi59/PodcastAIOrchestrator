@@ -58,7 +58,7 @@ with st.sidebar:
     )
     
     # Save preferences button
-    if st.button("Save Preferences"):
+    if st.button("Save Preferences", key="save_preferences"):
         preferences = {
             "preferred_topics": preferred_topics,
             "preferred_length": preferred_length,
@@ -287,7 +287,7 @@ else:
         with check_tabs[3]:
             st.markdown(st.session_state.workflow.refined_script)
         
-        if st.button("Continue to Audio Generation"):
+        if st.button("Continue to Audio Generation", key="continue_to_audio"):
             st.session_state.step = 4
             st.rerun()
     
@@ -318,7 +318,7 @@ else:
         st.session_state.workflow.selected_voice = selected_voice
         
         # Audio generation
-        if st.button("Generate Audio") or hasattr(st.session_state.workflow, 'audio_generating'):
+        if st.button("Generate Audio", key="generate_audio") or hasattr(st.session_state.workflow, 'audio_generating'):
             if not hasattr(st.session_state.workflow, 'audio_completed'):
                 st.session_state.workflow.audio_generating = True
                 
@@ -338,7 +338,7 @@ else:
             st.subheader("Podcast Audio")
             st.audio(st.session_state.workflow.audio_path)
             
-            if st.button("Continue to Promotion"):
+            if st.button("Continue to Promotion", key="continue_to_promotion"):
                 st.session_state.step = 5
                 st.rerun()
     
@@ -377,7 +377,7 @@ else:
             st.markdown("### Hashtags")
             st.markdown(", ".join(st.session_state.workflow.promotion['hashtags']))
         
-        if st.button("Continue to Email Distribution"):
+        if st.button("Continue to Email Distribution", key="continue_to_email"):
             st.session_state.step = 6
             st.rerun()
     
@@ -424,7 +424,7 @@ else:
         st.markdown(email_body)
         
         # Send email button
-        if st.button("Send to Subscribers"):
+        if st.button("Send to Subscribers", key="send_to_subscribers"):
             if subscribers:
                 with st.spinner("Sending emails to subscribers..."):
                     send_result = st.session_state.workflow.send_emails(subscribers)
@@ -462,7 +462,7 @@ else:
         next_cols = st.columns(3)
         
         with next_cols[0]:
-            if st.button("Create Another Podcast"):
+            if st.button("Create Another Podcast", key="create_another_podcast"):
                 # Reset workflow and go back to step 0
                 st.session_state.step = 0
                 st.session_state.workflow = None
@@ -475,12 +475,12 @@ else:
                 st.rerun()
         
         with next_cols[1]:
-            if st.button("View Podcast History"):
+            if st.button("View Podcast History", key="view_history_final"):
                 st.session_state.show_history = True
                 st.rerun()
         
         with next_cols[2]:
-            if st.button("Edit Preferences"):
+            if st.button("Edit Preferences", key="edit_preferences_final"):
                 st.session_state.show_history = False
                 # The preferences panel is always visible in the sidebar
                 st.rerun()
