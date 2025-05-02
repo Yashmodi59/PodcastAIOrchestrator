@@ -43,26 +43,64 @@ class ResearchAgent:
         # Try to find exact match first
         page = self.wiki.page(topic_title)
         
-        # If no exact match, search for related pages
+        # If no exact match, try with capitalized first letters
         if not page.exists():
-            # Try to search for related terms
-            search_terms = topic_title.split()
-            for term in search_terms:
-                if len(term) > 3:  # Skip short words
+            # Try capitalizing first letter of each word
+            capitalized_title = ' '.join(word.capitalize() for word in topic_title.split())
+            page = self.wiki.page(capitalized_title)
+            
+        # If still no match, try searching for the whole phrase with common variations
+        if not page.exists():
+            variations = [
+                topic_title.capitalize(),  # Capitalize first letter only
+                topic_title.title(),       # Capitalize Each Word
+                topic_title.upper(),       # ALL UPPERCASE
+                topic_title.lower(),       # all lowercase
+                topic_title.replace(' ', '_')  # Replace spaces with underscores
+            ]
+            
+            for variation in variations:
+                test_page = self.wiki.page(variation)
+                if test_page.exists():
+                    page = test_page
+                    break
+        
+        # If still no exact match, search for the two most important words together
+        if not page.exists():
+            words = [word for word in topic_title.split() if len(word) > 3]
+            if len(words) >= 2:
+                combined_terms = []
+                # Try pairs of words
+                for i in range(len(words) - 1):
+                    combined_terms.append(f"{words[i]} {words[i+1]}")
+                
+                for term in combined_terms:
                     test_page = self.wiki.page(term)
                     if test_page.exists():
                         page = test_page
                         break
         
-        # If still no match, use a generic page
+        # If still no match, use a generic page related to the topic
         if not page.exists():
-            # Fallback to a related generic topic
-            generic_topics = ["Technology", "Science", "Health", "Entertainment", "Business", "Politics"]
+            # Try to match with topics of interest
+            generic_topics = ["Technology", "Science", "Health", "Entertainment", "Business", 
+                             "Politics", "Education", "Sports", "Travel", "History", "Art"]
+            
+            # First look for matches in the topic title
             for topic in generic_topics:
-                test_page = self.wiki.page(topic)
-                if test_page.exists():
-                    page = test_page
-                    break
+                if topic.lower() in topic_title.lower():
+                    test_page = self.wiki.page(topic)
+                    if test_page.exists():
+                        page = test_page
+                        break
+            
+            # If still no match, use any generic topic that exists
+            if not page.exists():
+                for topic in generic_topics:
+                    test_page = self.wiki.page(topic)
+                    if test_page.exists():
+                        page = test_page
+                        break
         
         # Extract data from the Wikipedia page
         if page.exists():

@@ -70,19 +70,22 @@ with st.sidebar:
     
     # Navigation
     st.subheader("Navigation")
-    if st.button("Create New Podcast"):
+    if st.button("Create New Podcast", key="nav_new_podcast"):
         st.session_state.step = 0
         st.session_state.current_podcast = None
         st.session_state.workflow = None
         st.session_state.show_history = False
+        # Clear topic suggestions to get fresh ones based on updated preferences
+        if "topic_suggestions" in st.session_state:
+            del st.session_state.topic_suggestions
     
-    if st.button("View Podcast History"):
+    if st.button("View Podcast History", key="nav_history"):
         st.session_state.show_history = True
     
     # Email subscription form
     st.subheader("Subscribe for Updates")
     email = st.text_input("Email Address")
-    if st.button("Subscribe") and email:
+    if st.button("Subscribe", key="subscribe_button") and email:
         # Add email to subscribers list
         with open("subscribers.txt", "a") as f:
             f.write(f"{email}\n")
@@ -134,8 +137,20 @@ else:
             with st.spinner("Generating topic suggestions..."):
                 st.session_state.topic_suggestions = st.session_state.workflow.get_topic_suggestions()
         
+        # Add a refresh button for topics
+        refresh_col1, refresh_col2 = st.columns([3, 1])
+        with refresh_col1:
+            st.subheader("Suggested Topics")
+        with refresh_col2:
+            if st.button("🔄 Refresh", key="refresh_topics"):
+                with st.spinner("Generating new topic suggestions..."):
+                    # Update the workflow with current preferences
+                    st.session_state.workflow.preferences = st.session_state.preferences
+                    # Generate new suggestions
+                    st.session_state.topic_suggestions = st.session_state.workflow.get_topic_suggestions()
+                    st.success("Topics refreshed!")
+        
         # Display topic options
-        st.subheader("Suggested Topics")
         topic_cols = st.columns(3)
         for i, topic in enumerate(st.session_state.topic_suggestions):
             with topic_cols[i % 3]:
@@ -150,7 +165,7 @@ else:
         custom_topic = st.text_input("Custom Topic Title")
         custom_description = st.text_area("Brief Description")
         
-        if st.button("Use Custom Topic") and custom_topic:
+        if st.button("Use Custom Topic", key="use_custom_topic") and custom_topic:
             custom_topic_obj = {"title": custom_topic, "description": custom_description}
             st.session_state.workflow.select_topic(custom_topic_obj)
             st.session_state.step = 1
@@ -189,7 +204,7 @@ else:
             for topic in st.session_state.workflow.research['related_topics']:
                 st.markdown(f"• {topic}")
         
-        if st.button("Continue to Script Creation"):
+        if st.button("Continue to Script Creation", key="continue_to_script"):
             st.session_state.step = 2
             st.rerun()
     
@@ -219,11 +234,11 @@ else:
         
         # Save edited script
         if edited_script != st.session_state.workflow.script:
-            if st.button("Save Changes"):
+            if st.button("Save Changes", key="save_script_changes"):
                 st.session_state.workflow.script = edited_script
                 st.success("Script updated!")
         
-        if st.button("Continue to Content Check"):
+        if st.button("Continue to Content Check", key="continue_to_content_check"):
             st.session_state.step = 3
             st.rerun()
     
